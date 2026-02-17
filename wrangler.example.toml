@@ -1,0 +1,17 @@
+# Cloudflare Pages + Functions 配置模板
+# 使用说明：
+# 1. 复制此文件为 wrangler.toml
+# 2. 从 Cloudflare Dashboard 获取实际的 database_id 和 bucket_name
+# 3. wrangler.toml 已在 .gitignore 中，不会被提交
+
+name = "tk-report"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tk_report_db"
+database_id = "<从 Cloudflare Dashboard > D1 > 你的数据库 > 获取 Database ID>"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "<你的 R2 bucket 名称>"

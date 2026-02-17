@@ -1,0 +1,8 @@
+{
+  "name": "勘探报告工具",
+  "description": "一个用于创建和管理现场勘探报告的移动端 Web 应用。用户可以记录项目信息，包括厂区概况、建筑屋面、电气设施和所需文件清单。",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "proxies": []
+}

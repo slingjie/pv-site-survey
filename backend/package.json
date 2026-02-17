@@ -1,0 +1,13 @@
+{
+  "name": "tk-report-api",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "migrate": "wrangler d1 migrations apply tk_report_db"
+  },
+  "devDependencies": {
+    "wrangler": "^3.99.0"
+  }
+}
