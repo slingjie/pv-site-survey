@@ -26,7 +26,7 @@ const Chip: React.FC<ChipProps> = ({ label, selected, onClick, onRemove, canAdd 
   return (
     <div
       onClick={!disabled ? onClick : undefined}
-      className={`relative h-8 inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium transition ${
+      className={`relative h-7 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition whitespace-nowrap flex-shrink-0 ${
         disabled
           ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
           : 'cursor-pointer'

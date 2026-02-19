@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import type { Project } from "../../types";
-import { MapPin, Plus, X } from "../icons";
+import { MapPin, Plus, Search, X } from "../icons";
+import Chip from "../common/Chip";
 
 interface ProjectCardProps {
   project: Project;
@@ -75,52 +76,110 @@ interface HomePageProps {
   isMobileView: boolean;
 }
 
-const HomePage: React.FC<HomePageProps> = ({
+const statusOptions = [
+  { value: "", label: "全部" },
+  { value: "editing", label: "踏勘中" },
+  { value: "completed", label: "已完成" },
+] as const;
+
+const typeOptions = [
+  { value: "", label: "全部" },
+  { value: "pv", label: "光伏" },
+  { value: "storage", label: "储能" },
+  { value: "pv_storage", label: "光储一体" },
+  { value: "other", label: "其他" },
+] as const;
+
+function HomePage({
   projects,
   onSelectProject,
   onCreateNew,
   onDeleteProject,
   isMobileView,
-}) => (
-  <div className="h-full flex flex-col font-sans bg-gray-50">
-    <header className="flex-shrink-0 bg-white shadow-sm z-10">
-      <div
-        className={`h-14 flex items-center justify-between px-4 relative ${isMobileView ? "" : "max-w-7xl mx-auto"}`}
-      >
-        <div className="flex items-center" />
+}: HomePageProps) {
+  const [searchText, setSearchText] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
 
-        <h1 className="text-lg font-medium absolute left-1/2 -translate-x-1/2">我的项目</h1>
+  const filteredProjects = useMemo(() => {
+    const q = searchText.trim().toLowerCase();
+    return projects.filter((p) => {
+      if (q && !p.name.toLowerCase().includes(q) && !p.location.toLowerCase().includes(q)) return false;
+      if (statusFilter && p.status !== statusFilter) return false;
+      if (typeFilter && (p.projectType || "") !== typeFilter) return false;
+      return true;
+    });
+  }, [projects, searchText, statusFilter, typeFilter]);
 
-        <button
-          onClick={onCreateNew}
-          className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-full transition"
+  return (
+    <div className="h-full flex flex-col font-sans bg-gray-50">
+      <header className="flex-shrink-0 bg-white shadow-sm z-10">
+        <div
+          className={`h-14 flex items-center justify-between px-4 relative ${isMobileView ? "" : "max-w-7xl mx-auto"}`}
         >
-          <Plus size={24} />
-        </button>
-      </div>
-    </header>
+          <div className="flex items-center" />
+          <h1 className="text-lg font-medium absolute left-1/2 -translate-x-1/2">我的项目</h1>
+          <button
+            onClick={onCreateNew}
+            className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-full transition"
+          >
+            <Plus size={24} />
+          </button>
+        </div>
+      </header>
 
-    <main
-      className={`flex-1 overflow-y-auto p-4 ${isMobileView ? "space-y-4" : "max-w-7xl mx-auto w-full"}`}
-    >
-      <div
-        className={
-          isMobileView
-            ? "space-y-4"
-            : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        }
-      >
-        {projects.map((project) => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            onClick={() => onSelectProject(project.id)}
-            onDelete={() => onDeleteProject(project.id)}
+      {/* Search & Filter Bar */}
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2 space-y-2">
+        <div className="relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="搜索项目名称或地点..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 text-sm bg-gray-100 rounded-lg border-none outline-none focus:ring-2 focus:ring-yellow-400"
           />
-        ))}
+        </div>
+        <div className="relative">
+          <div className="flex items-center overflow-x-auto scrollbar-hide gap-2 pb-1">
+            {statusOptions.map((o) => (
+              <Chip key={`s-${o.value}`} label={o.label} selected={statusFilter === o.value} onClick={() => setStatusFilter(o.value)} />
+            ))}
+            <span className="text-gray-300 mx-1 flex-shrink-0">|</span>
+            {typeOptions.map((o) => (
+              <Chip key={`t-${o.value}`} label={o.label} selected={typeFilter === o.value} onClick={() => setTypeFilter(o.value)} />
+            ))}
+          </div>
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+        </div>
       </div>
-    </main>
-  </div>
-);
+
+      <main
+        className={`flex-1 overflow-y-auto p-4 ${isMobileView ? "space-y-4" : "max-w-7xl mx-auto w-full"}`}
+      >
+        {filteredProjects.length === 0 ? (
+          <div className="text-center text-gray-400 py-12">未找到匹配的项目</div>
+        ) : (
+          <div
+            className={
+              isMobileView
+                ? "space-y-4"
+                : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            }
+          >
+            {filteredProjects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                onClick={() => onSelectProject(project.id)}
+                onDelete={() => onDeleteProject(project.id)}
+              />
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
 
 export default HomePage;

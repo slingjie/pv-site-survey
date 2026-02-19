@@ -278,7 +278,7 @@ export default function App() {
       {/* View Toggle Floating Button */}
       <button
         onClick={() => setIsMobileView(!isMobileView)}
-        className="hidden md:flex fixed bottom-6 right-6 safe-area-margin-bottom z-50 p-4 bg-gray-900 text-white rounded-full shadow-lg hover:bg-gray-800 transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center"
+        className="fixed bottom-6 right-6 safe-area-margin-bottom z-50 p-4 bg-gray-900 text-white rounded-full shadow-lg hover:bg-gray-800 transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center"
         title={isMobileView ? "切换到电脑视图" : "切换到手机视图"}
       >
         {isMobileView ? <Monitor size={24} /> : <Smartphone size={24} />}
