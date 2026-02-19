@@ -23,7 +23,7 @@ const NewProjectPage: React.FC<NewProjectPageProps> = ({
 }) => {
   const [projectName, setProjectName] = useState("");
   const [location, setLocation] = useState("");
-  const [surveyDate, setSurveyDate] = useState("");
+  const [surveyDate, setSurveyDate] = useState(new Date().toISOString().slice(0, 10));
   const [surveyors, setSurveyors] = useState("");
   const [projectType, setProjectType] =
     useState<NonNullable<Project["projectType"]>>("pv");
