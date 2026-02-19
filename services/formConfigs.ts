@@ -102,7 +102,7 @@ export const roofModuleConfig = {
       title: "基础信息",
       fields: [
         { key: "name", label: "屋顶名称", type: "text", required: true },
-        { key: "area", label: "屋顶面积 (㎡)", type: "number", required: true },
+        { key: "area", label: "屋顶面积 (㎡)", type: "number", required: true, placeholder: "例：5000" },
         {
           key: "type",
           label: "屋顶类型",
@@ -115,6 +115,7 @@ export const roofModuleConfig = {
           label: "预估容量 (MW)",
           type: "number",
           required: true,
+          placeholder: "例：0.5",
         },
         { key: "birdView", label: "房屋鸟瞰图", type: "image" },
         {
@@ -169,7 +170,7 @@ export const roofModuleConfig = {
           enumKey: "ROOF_ABNORMAL_TYPE",
         },
         { key: "abnormalImage", label: "异常照片", type: "image" },
-        { key: "abnormalDescription", label: "异常说明", type: "textarea" },
+        { key: "abnormalDescription", label: "异常说明", type: "textarea", placeholder: "例：东南角有轻微漏水痕迹" },
       ],
     },
     {
@@ -180,6 +181,7 @@ export const roofModuleConfig = {
           key: "surroundingDescription",
           label: "周边环境说明",
           type: "textarea",
+          placeholder: "例：南侧无高层建筑遮挡",
         },
         { key: "surroundingImage", label: "周边照片", type: "image" },
       ],
@@ -221,7 +223,7 @@ export const electricalModuleConfig = {
           type: "select",
           enumKey: "ELECTRICAL_VOLTAGE",
         },
-        { key: "switchStationLevel", label: "开关站情况", type: "text" },
+        { key: "switchStationLevel", label: "开关站情况", type: "text", placeholder: "例：无 / 10kV开关站" },
         {
           key: "transformerInfoJson",
           label: "变压器信息",
@@ -245,7 +247,7 @@ export const electricalModuleConfig = {
           type: "select",
           enumKey: "GRID_MODE",
         },
-        { key: "gridCabinetLocation", label: "并网柜位置", type: "text" },
+        { key: "gridCabinetLocation", label: "并网柜位置", type: "text", placeholder: "例：1F配电房旁" },
         {
           key: "cableLayingMethods",
           label: "电缆敷设方式",
@@ -256,6 +258,7 @@ export const electricalModuleConfig = {
           key: "cablePathDescription",
           label: "电缆路径说明",
           type: "textarea",
+          placeholder: "例：沿电缆沟敷设至并网柜",
         },
         {
           key: "gridLevel",
@@ -267,8 +270,9 @@ export const electricalModuleConfig = {
           key: "gridSchemeDescription",
           label: "接入方案描述",
           type: "textarea",
+          placeholder: "例：拟采用0.4kV低压侧并网",
         },
-        { key: "gridAttention", label: "注意事项", type: "textarea" },
+        { key: "gridAttention", label: "注意事项", type: "textarea", placeholder: "例：注意避开现有电缆路径" },
       ],
     },
   ],

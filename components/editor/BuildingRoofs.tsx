@@ -24,6 +24,7 @@ interface DynamicFieldProps {
     type: string;
     required?: boolean;
     enumKey?: string;
+    placeholder?: string;
   };
   value: any;
   onChange: (value: any) => void;
@@ -42,19 +43,19 @@ const DynamicField: React.FC<DynamicFieldProps> = ({ field, value, onChange, onP
     case 'text':
       return (
         <FormField {...commonProps}>
-          <TextInput value={value || ''} onChange={(e) => onChange(e.target.value)} disabled={!isEditing}/>
+          <TextInput value={value || ''} onChange={(e) => onChange(e.target.value)} disabled={!isEditing} placeholder={field.placeholder}/>
         </FormField>
       );
     case 'number':
        return (
         <FormField {...commonProps}>
-            <TextInput type="number" value={value || ''} onChange={(e) => onChange(parseFloat(e.target.value) || 0)} disabled={!isEditing}/>
+            <TextInput type="number" value={value || ''} onChange={(e) => onChange(parseFloat(e.target.value) || 0)} disabled={!isEditing} placeholder={field.placeholder}/>
         </FormField>
       );
     case 'textarea':
       return (
         <FormField {...commonProps}>
-          <TextArea value={value || ''} onChange={(e) => onChange(e.target.value)} disabled={!isEditing}/>
+          <TextArea value={value || ''} onChange={(e) => onChange(e.target.value)} disabled={!isEditing} placeholder={field.placeholder}/>
         </FormField>
       );
     case 'select':

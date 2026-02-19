@@ -312,7 +312,7 @@ const PlantOverview: React.FC<PlantOverviewProps> = ({
                     onChange={(e) =>
                       handleFieldChange("address", e.target.value)
                     }
-                    placeholder="请输入或点击右侧按钮定位"
+                    placeholder="例：杭州市余杭区XX路XX号"
                     disabled={!isEditing}
                   />
                   <button
@@ -407,7 +407,7 @@ const PlantOverview: React.FC<PlantOverviewProps> = ({
                 onChange={(e) =>
                   handleNestedChange("traffic", "description", e.target.value)
                 }
-                placeholder="说明设备及材料运输的交通情况"
+                placeholder="例：交通便利，大型货车可直达厂区"
                 disabled={!isEditing}
               />
             </FormField>
@@ -460,7 +460,7 @@ const PlantOverview: React.FC<PlantOverviewProps> = ({
                 onChange={(e) =>
                   handleNestedChange("riskZone", "description", e.target.value)
                 }
-                placeholder="请说明风险区域情况"
+                placeholder="例：C栋厂房为高温车间，需注意隔热"
                 disabled={!isEditing}
               />
             </FormField>
