@@ -147,8 +147,7 @@ const ElectricalFacilities: React.FC<ElectricalFacilitiesProps> = ({ data, onDat
 
   const removeSubFacility = (idToRemove: string) => {
     const updatedSubFacilities = data.subFacilities
-        .filter(sf => sf.id !== idToRemove)
-        .map((sf, index) => ({ ...sf, name: `${index + 1}#设施`})); // Re-number names
+        .filter(sf => sf.id !== idToRemove);
     onDataChange({ ...data, subFacilities: updatedSubFacilities });
   };
 
@@ -162,7 +161,16 @@ const ElectricalFacilities: React.FC<ElectricalFacilitiesProps> = ({ data, onDat
                 {data.subFacilities.map(subFacility => (
                     <div key={subFacility.id} className="bg-white rounded-lg shadow p-4 relative">
                         <div className="flex justify-between items-center mb-4">
-                            <h4 className="text-base font-medium text-gray-800">{subFacility.name}</h4>
+                            {isEditing ? (
+                                <input
+                                    type="text"
+                                    value={subFacility.name}
+                                    onChange={e => handleSubFacilityChange(subFacility.id, 'name', e.target.value)}
+                                    className="text-base font-medium text-gray-800 border-b border-gray-300 focus:border-yellow-500 outline-none bg-transparent"
+                                />
+                            ) : (
+                                <h4 className="text-base font-medium text-gray-800">{subFacility.name}</h4>
+                            )}
                             {isEditing && (
                                 <button
                                     onClick={() => removeSubFacility(subFacility.id)}
