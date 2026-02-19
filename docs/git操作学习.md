@@ -7,13 +7,13 @@
 
   在项目目录里执行一次（之后就不用再改了）：
 
-  git remote set-url origin https://github.com/slingjie/Site-survey-records.git
+  git remote set-url origin https://github.com/slingjie/pv-site-survey.git
 
   然后确认一下：
 
   git remote -v
 
-  看到 origin 的地址已经是 Site-survey-records.git 就可以了。
+  看到 origin 的地址已经是 pv-site-survey.git 就可以了。
 
   ———
 

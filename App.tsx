@@ -13,6 +13,8 @@ import {
   saveProjectWithReport,
   updateProjectStatusRemote,
 } from "./services/projectApi";
+import SyncIndicator from "./components/SyncIndicator";
+import { trySync } from "./services/sync";
 
 export default function App() {
   const [currentView, setCurrentView] = useState<
@@ -37,6 +39,8 @@ export default function App() {
       .then((list) => setProjects(list))
       .catch((e) => console.error("加载项目列表失败：", e))
       .finally(() => setInitializing(false));
+
+    trySync();
   }, []);
 
   const handleSelectProject = async (reportId: string) => {
@@ -279,6 +283,8 @@ export default function App() {
       >
         {isMobileView ? <Monitor size={24} /> : <Smartphone size={24} />}
       </button>
+
+      <SyncIndicator />
     </div>
   );
 }

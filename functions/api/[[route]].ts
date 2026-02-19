@@ -40,9 +40,18 @@ function ok() {
   return withCors(new Response(null, { status: 204 }));
 }
 
+async function ensureTable(db: D1Database) {
+  await db.prepare(`CREATE TABLE IF NOT EXISTS projects (
+    id TEXT PRIMARY KEY, name TEXT NOT NULL, location TEXT NOT NULL, status TEXT NOT NULL,
+    survey_date TEXT, surveyors TEXT, project_type TEXT, report_data TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
+  )`).run();
+}
+
 export const onRequest: PagesFunction<Env> = async (ctx) => {
   const { request, env } = ctx;
   if (request.method === "OPTIONS") return ok();
+  await ensureTable(env.DB);
 
   const url = new URL(request.url);
   const path = url.pathname.replace(/^\/api/, "") || "/";

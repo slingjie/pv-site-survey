@@ -1,4 +1,6 @@
 import type { Project, ReportData } from "../types";
+import * as db from "./db";
+import { trySync } from "./sync";
 
 const isDataUrl = (value: string | null): value is string =>
   !!value && value.startsWith("data:");
@@ -220,21 +222,21 @@ export const prepareReportDataWithUploadedImages = async (
   return cloned;
 };
 
-// -------------------- 项目数据 CRUD 封装 --------------------
+// -------------------- Remote API (供 sync.ts 使用) --------------------
 
-export const listProjects = async (): Promise<Project[]> => {
+export const listProjectsRemote = async (): Promise<Project[]> => {
   const res = await fetch("/api/projects");
   if (!res.ok) throw new Error("加载项目列表失败");
   return res.json();
 };
 
-export const getProjectWithReport = async (id: string) => {
+export const getProjectWithReportRemote = async (id: string) => {
   const res = await fetch(`/api/projects/${id}`);
   if (!res.ok) throw new Error("加载项目失败");
   return res.json() as Promise<{ project: Project; reportData: ReportData }>;
 };
 
-export const createProjectWithReport = async (
+export const createProjectWithReportRemote = async (
   project: Project,
   reportData: ReportData,
 ): Promise<ReportData> => {
@@ -248,7 +250,7 @@ export const createProjectWithReport = async (
   return payloadReport;
 };
 
-export const saveProjectWithReport = async (
+export const saveProjectWithReportRemote = async (
   project: Project,
   reportData: ReportData,
 ): Promise<ReportData> => {
@@ -262,7 +264,7 @@ export const saveProjectWithReport = async (
   return payloadReport;
 };
 
-export const updateProjectStatusRemote = async (
+export const updateProjectStatusRemoteApi = async (
   projectId: string,
   status: Project["status"],
 ) => {
@@ -274,8 +276,91 @@ export const updateProjectStatusRemote = async (
   if (!res.ok) throw new Error("更新状态失败");
 };
 
-export const deleteProjectRemote = async (projectId: string) => {
+export const deleteProjectRemoteApi = async (projectId: string) => {
   const res = await fetch(`/api/projects/${projectId}`, { method: "DELETE" });
   if (!res.ok) throw new Error("删除项目失败");
+};
+
+// -------------------- Local-first CRUD --------------------
+
+export const listProjects = async (): Promise<Project[]> => {
+  const local = await db.getAllProjects();
+  if (local.length > 0) return local;
+  if (!navigator.onLine) return [];
+  try {
+    const remote = await listProjectsRemote();
+    for (const p of remote) await db.saveProject(p);
+    return remote;
+  } catch {
+    return [];
+  }
+};
+
+export const getProjectWithReport = async (
+  id: string,
+): Promise<{ project: Project; reportData: ReportData }> => {
+  const project = await db.getProject(id);
+  const reportData = await db.getReportData(id);
+  if (project && reportData) return { project, reportData };
+  const remote = await getProjectWithReportRemote(id);
+  await db.saveProject(remote.project);
+  await db.saveReportData(id, remote.reportData);
+  return remote;
+};
+
+export const createProjectWithReport = async (
+  project: Project,
+  reportData: ReportData,
+): Promise<ReportData> => {
+  await db.saveProject(project);
+  await db.saveReportData(project.id, reportData);
+  await db.addToSyncQueue({
+    action: "create",
+    projectId: project.id,
+    timestamp: Date.now(),
+  });
+  trySync();
+  return reportData;
+};
+
+export const saveProjectWithReport = async (
+  project: Project,
+  reportData: ReportData,
+): Promise<ReportData> => {
+  await db.saveProject(project);
+  await db.saveReportData(project.id, reportData);
+  await db.addToSyncQueue({
+    action: "update",
+    projectId: project.id,
+    timestamp: Date.now(),
+  });
+  trySync();
+  return reportData;
+};
+
+export const updateProjectStatusRemote = async (
+  projectId: string,
+  status: Project["status"],
+): Promise<void> => {
+  const project = await db.getProject(projectId);
+  if (project) await db.saveProject({ ...project, status });
+  await db.addToSyncQueue({
+    action: "updateStatus",
+    projectId,
+    data: { status },
+    timestamp: Date.now(),
+  });
+  trySync();
+};
+
+export const deleteProjectRemote = async (projectId: string): Promise<void> => {
+  await db.deleteProject(projectId);
+  await db.deleteReportData(projectId);
+  await db.addToSyncQueue({
+    action: "delete",
+    projectId,
+    timestamp: Date.now(),
+  });
+  trySync();
 };
 
