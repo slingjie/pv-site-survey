@@ -41,6 +41,7 @@ interface ProjectRow {
   user_id: string;
   created_at: string;
   updated_at: string;
+  owner_email?: string;
 }
 
 const BACKFILL_USER_ID_MIGRATION_KEY = "backfill_user_id";
@@ -55,6 +56,7 @@ function rowToSummary(row: ProjectRow) {
     surveyors: row.surveyors || undefined,
     projectType: (row.project_type as ProjectType) || null,
     updatedAt: row.updated_at,
+    ownerEmail: row.owner_email || undefined,
   };
 }
 
@@ -272,10 +274,12 @@ const apiHandler: PagesFunction<Env, string, PluginData> = async (ctx) => {
       if (method === "GET") {
         const query =
           currentUser.role === "admin"
-            ? env.DB.prepare("SELECT * FROM projects ORDER BY updated_at DESC")
+            ? env.DB.prepare(
+                "SELECT p.*, u.email AS owner_email FROM projects p LEFT JOIN users u ON p.user_id = u.id ORDER BY p.updated_at DESC",
+              )
             : env.DB
                 .prepare(
-                  "SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC",
+                  "SELECT p.*, u.email AS owner_email FROM projects p LEFT JOIN users u ON p.user_id = u.id WHERE p.user_id = ? ORDER BY p.updated_at DESC",
                 )
                 .bind(currentUser.id);
         const { results } = await query.all<ProjectRow>();

@@ -10,6 +10,8 @@ export interface Project {
   surveyors?: string;
   /** 项目类型：光伏 / 储能 / 光储 / 其他 */
   projectType?: "pv" | "storage" | "pv_storage" | "other";
+  /** 创建者邮箱（管理员列表接口返回） */
+  ownerEmail?: string;
 }
 
 export interface User {

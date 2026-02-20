@@ -16,6 +16,7 @@ import {
 import SyncIndicator from "./components/SyncIndicator";
 import { trySync } from "./services/sync";
 import { fetchCurrentUser, logout } from "./services/authApi";
+import { getLastUserId, setLastUserId, clearAllData } from "./services/db";
 import {
   isAuthRequiredError,
   isForbiddenError,
@@ -64,6 +65,11 @@ export default function App() {
       try {
         const user = await fetchCurrentUser();
         setCurrentUser(user);
+
+        if (getLastUserId() !== user.id) {
+          await clearAllData();
+          setLastUserId(user.id);
+        }
 
         const list = await listProjects();
         setProjects(list);
@@ -315,6 +321,7 @@ export default function App() {
         onCreateNew={handleNavigateToNew}
         onDeleteProject={handleDeleteProject}
         isMobileView={isMobileView}
+        currentUser={currentUser}
       />
     );
   };

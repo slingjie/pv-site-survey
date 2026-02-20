@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import type { Project } from "../../types";
+import type { Project, User } from "../../types";
 import { MapPin, Plus, Search, X } from "../icons";
 import Chip from "../common/Chip";
 
@@ -7,12 +7,14 @@ interface ProjectCardProps {
   project: Project;
   onClick: () => void;
   onDelete: () => void;
+  canDelete: boolean;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
   onClick,
   onDelete,
+  canDelete,
 }) => (
   <div
     onClick={onClick}
@@ -31,16 +33,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         >
           {project.status === "editing" ? "踏勘中" : "已完成"}
         </span>
-        <button
-          className="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-          title="删除项目"
-        >
-          <X size={14} />
-        </button>
+        {canDelete && (
+          <button
+            className="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            title="删除项目"
+          >
+            <X size={14} />
+          </button>
+        )}
       </div>
     </div>
     <div className="flex items-center text-sm text-gray-500">
@@ -65,6 +69,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               : "其他"}
       </div>
     )}
+    {project.ownerEmail && (
+      <div className="mt-1 text-xs text-gray-400 truncate">
+        创建人：{project.ownerEmail}
+      </div>
+    )}
   </div>
 );
 
@@ -74,6 +83,7 @@ interface HomePageProps {
   onCreateNew: () => void;
   onDeleteProject: (id: string) => void;
   isMobileView: boolean;
+  currentUser: User | null;
 }
 
 const statusOptions = [
@@ -96,10 +106,20 @@ function HomePage({
   onCreateNew,
   onDeleteProject,
   isMobileView,
+  currentUser,
 }: HomePageProps) {
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [userFilter, setUserFilter] = useState("");
+
+  const isAdmin = currentUser?.role === "admin";
+
+  const uniqueEmails = useMemo(() => {
+    if (!isAdmin) return [];
+    const set = new Set(projects.map((p) => p.ownerEmail).filter(Boolean) as string[]);
+    return Array.from(set);
+  }, [projects, isAdmin]);
 
   const filteredProjects = useMemo(() => {
     const q = searchText.trim().toLowerCase();
@@ -107,9 +127,10 @@ function HomePage({
       if (q && !p.name.toLowerCase().includes(q) && !p.location.toLowerCase().includes(q)) return false;
       if (statusFilter && p.status !== statusFilter) return false;
       if (typeFilter && (p.projectType || "") !== typeFilter) return false;
+      if (userFilter && p.ownerEmail !== userFilter) return false;
       return true;
     });
-  }, [projects, searchText, statusFilter, typeFilter]);
+  }, [projects, searchText, statusFilter, typeFilter, userFilter]);
 
   return (
     <div className="h-full flex flex-col font-sans bg-gray-50">
@@ -152,6 +173,17 @@ function HomePage({
           </div>
           <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
         </div>
+        {isAdmin && uniqueEmails.length > 1 && (
+          <div className="relative">
+            <div className="flex items-center overflow-x-auto scrollbar-hide gap-2 pb-1">
+              <Chip label="全部用户" selected={userFilter === ""} onClick={() => setUserFilter("")} />
+              {uniqueEmails.map((email) => (
+                <Chip key={email} label={email} selected={userFilter === email} onClick={() => setUserFilter(email)} />
+              ))}
+            </div>
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+          </div>
+        )}
       </div>
 
       <main
@@ -173,6 +205,7 @@ function HomePage({
                 project={project}
                 onClick={() => onSelectProject(project.id)}
                 onDelete={() => onDeleteProject(project.id)}
+                canDelete={!isAdmin || project.ownerEmail === currentUser?.email}
               />
             ))}
           </div>
