@@ -83,6 +83,30 @@ export async function deleteReportData(projectId: string): Promise<void> {
   await req(store.delete(projectId));
 }
 
+// ---- User switch ----
+
+const LAST_USER_KEY = "tk-last-user-id";
+
+export function getLastUserId(): string | null {
+  return localStorage.getItem(LAST_USER_KEY);
+}
+
+export function setLastUserId(userId: string): void {
+  localStorage.setItem(LAST_USER_KEY, userId);
+}
+
+export async function clearAllData(): Promise<void> {
+  const database = await openDB();
+  const txn = database.transaction(["projects", "reportData", "syncQueue"], "readwrite");
+  txn.objectStore("projects").clear();
+  txn.objectStore("reportData").clear();
+  txn.objectStore("syncQueue").clear();
+  await new Promise<void>((resolve, reject) => {
+    txn.oncomplete = () => resolve();
+    txn.onerror = () => reject(txn.error);
+  });
+}
+
 // ---- Sync Queue ----
 
 export async function addToSyncQueue(item: Omit<SyncQueueItem, "id">): Promise<void> {

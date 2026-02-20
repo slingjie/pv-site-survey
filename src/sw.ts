@@ -4,7 +4,12 @@ import { registerRoute } from "workbox-routing";
 import { CacheFirst, NetworkOnly } from "workbox-strategies";
 import { ExpirationPlugin } from "workbox-expiration";
 
+import { clientsClaim } from "workbox-core";
+
 declare let self: ServiceWorkerGlobalScope;
+
+self.skipWaiting();
+clientsClaim();
 
 // Precache static assets (injected by vite-plugin-pwa)
 precacheAndRoute(self.__WB_MANIFEST);

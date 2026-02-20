@@ -288,15 +288,15 @@ export const deleteProjectRemoteApi = async (projectId: string) => {
 // -------------------- Local-first CRUD --------------------
 
 export const listProjects = async (): Promise<Project[]> => {
-  const local = await db.getAllProjects();
-  if (local.length > 0) return local;
-  if (!navigator.onLine) return [];
+  if (!navigator.onLine) {
+    return db.getAllProjects();
+  }
   try {
     const remote = await listProjectsRemote();
     for (const p of remote) await db.saveProject(p);
     return remote;
   } catch {
-    return [];
+    return db.getAllProjects();
   }
 };
 
