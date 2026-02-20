@@ -15,3 +15,11 @@ database_id = "<从 Cloudflare Dashboard > D1 > 你的数据库 > 获取 Databas
 [[r2_buckets]]
 binding = "IMAGES"
 bucket_name = "<你的 R2 bucket 名称>"
+
+[vars]
+# Zero Trust team domain，可带或不带 https://
+CF_ACCESS_TEAM_DOMAIN = "your-team.cloudflareaccess.com"
+# Access Application 的 AUD tag
+CF_ACCESS_AUD = "<你的 Access AUD>"
+# 管理员邮箱，多个用英文逗号分隔
+ADMIN_EMAIL = "admin@example.com"

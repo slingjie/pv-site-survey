@@ -1,6 +1,10 @@
 import type { Project, ReportData } from "../types";
 import * as db from "./db";
 import { trySync } from "./sync";
+import { parseApiError } from "./apiError";
+
+const fetchApi = (input: RequestInfo | URL, init?: RequestInit) =>
+  fetch(input, { ...init, credentials: "include" });
 
 const isDataUrl = (value: string | null): value is string =>
   !!value && value.startsWith("data:");
@@ -19,9 +23,9 @@ const uploadImageDataUrl = async (
   formData.append("projectId", projectId);
   formData.append("fieldKey", fieldKey);
 
-  const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
-  if (!uploadRes.ok) throw new Error("图片上传失败");
-  const { url } = await uploadRes.json();
+  const uploadRes = await fetchApi("/api/upload", { method: "POST", body: formData });
+  if (!uploadRes.ok) throw await parseApiError(uploadRes, "图片上传失败");
+  const { url } = (await uploadRes.json()) as { url: string };
   return url;
 };
 
@@ -225,14 +229,14 @@ export const prepareReportDataWithUploadedImages = async (
 // -------------------- Remote API (供 sync.ts 使用) --------------------
 
 export const listProjectsRemote = async (): Promise<Project[]> => {
-  const res = await fetch("/api/projects");
-  if (!res.ok) throw new Error("加载项目列表失败");
+  const res = await fetchApi("/api/projects");
+  if (!res.ok) throw await parseApiError(res, "加载项目列表失败");
   return res.json();
 };
 
 export const getProjectWithReportRemote = async (id: string) => {
-  const res = await fetch(`/api/projects/${id}`);
-  if (!res.ok) throw new Error("加载项目失败");
+  const res = await fetchApi(`/api/projects/${id}`);
+  if (!res.ok) throw await parseApiError(res, "加载项目失败");
   return res.json() as Promise<{ project: Project; reportData: ReportData }>;
 };
 
@@ -241,12 +245,12 @@ export const createProjectWithReportRemote = async (
   reportData: ReportData,
 ): Promise<ReportData> => {
   const payloadReport = await prepareReportDataWithUploadedImages(project.id, reportData);
-  const res = await fetch("/api/projects", {
+  const res = await fetchApi("/api/projects", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ project, reportData: payloadReport }),
   });
-  if (!res.ok) throw new Error("创建项目失败");
+  if (!res.ok) throw await parseApiError(res, "创建项目失败");
   return payloadReport;
 };
 
@@ -255,12 +259,12 @@ export const saveProjectWithReportRemote = async (
   reportData: ReportData,
 ): Promise<ReportData> => {
   const payloadReport = await prepareReportDataWithUploadedImages(project.id, reportData);
-  const res = await fetch(`/api/projects/${project.id}`, {
+  const res = await fetchApi(`/api/projects/${project.id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ project, reportData: payloadReport }),
   });
-  if (!res.ok) throw new Error("保存项目失败");
+  if (!res.ok) throw await parseApiError(res, "保存项目失败");
   return payloadReport;
 };
 
@@ -268,17 +272,17 @@ export const updateProjectStatusRemoteApi = async (
   projectId: string,
   status: Project["status"],
 ) => {
-  const res = await fetch(`/api/projects/${projectId}/status`, {
+  const res = await fetchApi(`/api/projects/${projectId}/status`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status }),
   });
-  if (!res.ok) throw new Error("更新状态失败");
+  if (!res.ok) throw await parseApiError(res, "更新状态失败");
 };
 
 export const deleteProjectRemoteApi = async (projectId: string) => {
-  const res = await fetch(`/api/projects/${projectId}`, { method: "DELETE" });
-  if (!res.ok) throw new Error("删除项目失败");
+  const res = await fetchApi(`/api/projects/${projectId}`, { method: "DELETE" });
+  if (!res.ok) throw await parseApiError(res, "删除项目失败");
 };
 
 // -------------------- Local-first CRUD --------------------

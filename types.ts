@@ -12,6 +12,12 @@ export interface Project {
   projectType?: "pv" | "storage" | "pv_storage" | "other";
 }
 
+export interface User {
+  id: string;
+  email: string;
+  role: "user" | "admin";
+}
+
 export interface TrafficInfo {
   condition: "basic" | "limited";
   description: string;
