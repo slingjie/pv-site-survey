@@ -85,6 +85,13 @@ export default function App() {
           return;
         }
         console.error("初始化失败：", error);
+        const retryKey = "bootstrap_retry";
+        if (!sessionStorage.getItem(retryKey)) {
+          sessionStorage.setItem(retryKey, "1");
+          window.location.reload();
+          return;
+        }
+        sessionStorage.removeItem(retryKey);
         setAuthMessage("初始化失败，请刷新页面重试。");
       } finally {
         setInitializing(false);
